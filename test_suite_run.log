@@ -1,0 +1,50 @@
+kdarshan is running. Tracing target PID. Press Ctrl-C to stop...
+[DISCOVERY] File opened: /home/bigdatalab/tchoe/kdarshan/test_suite.bin (Hash: 36028943068081577, PID: 144754, Comm: kdarshan_test_s)
+DXT_TRACE: WRITE | PID: 144754 | Offset: 0 | Length: 10 | Start: 658659.618412526 | Duration: 0.000043972 | File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin
+DXT_TRACE: WRITE | PID: 144754 | Offset: 5 | Length: 16 | Start: 658659.618468750 | Duration: 0.000006164 | File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin
+DXT_TRACE: WRITE | PID: 144754 | Offset: 21 | Length: 20 | Start: 658659.618476552 | Duration: 0.000003490 | File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin
+DXT_TRACE: READ | PID: 144754 | Offset: 0 | Length: 10 | Start: 658659.618483974 | Duration: 0.000006216 | File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin
+DXT_TRACE: WRITE | PID: 144754 | Offset: 10 | Length: 10 | Start: 658659.618491974 | Duration: 0.000003406 | File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin
+
+======================== kdarshan POSIX I/O characterization report ========================
+
+File: /home/bigdatalab/tchoe/kdarshan/test_suite.bin (Hash: 36028943068081577)
+--------------------------------------------------------------------------------
+  POSIX_OPENS                   : 2
+  POSIX_DUPS                    : 1
+  POSIX_READS                   : 1
+  POSIX_WRITES                  : 4
+  POSIX_SEEKS                   : 2
+  POSIX_STATS                   : 1
+  POSIX_MMAPS                   : 1
+  POSIX_FSYNCS                  : 1
+  POSIX_FDSYNCS                 : 1
+  POSIX_MODE                    : 420
+  POSIX_BYTES_READ              : 10
+  POSIX_BYTES_WRITTEN           : 56
+  POSIX_MAX_BYTE_READ           : 9
+  POSIX_MAX_BYTE_WRITTEN        : 40
+  POSIX_CONSEC_WRITES           : 1
+  POSIX_SEQ_WRITES              : 1
+  POSIX_RW_SWITCHES             : 2
+  POSIX_MEM_NOT_ALIGNED         : 1
+  POSIX_MEM_ALIGNMENT           : 8
+  POSIX_FILE_NOT_ALIGNED        : 3
+  POSIX_FILE_ALIGNMENT          : 4096
+  POSIX_MAX_READ_TIME_SIZE      : 10
+  POSIX_MAX_WRITE_TIME_SIZE     : 10
+  POSIX_SIZE_READ_0_100         : 1
+  POSIX_SIZE_WRITE_0_100        : 4
+  POSIX_F_OPEN_START_TIMESTAMP  : 658659.618338472 sec (ktime)
+  POSIX_F_READ_START_TIMESTAMP  : 658659.618483974 sec (ktime)
+  POSIX_F_WRITE_START_TIMESTAMP : 658659.618412526 sec (ktime)
+  POSIX_F_CLOSE_START_TIMESTAMP : 658659.624950081 sec (ktime)
+  POSIX_F_OPEN_END_TIMESTAMP    : 658659.618338472 sec (ktime)
+  POSIX_F_READ_END_TIMESTAMP    : 658659.618490190 sec (ktime)
+  POSIX_F_WRITE_END_TIMESTAMP   : 658659.618495380 sec (ktime)
+  POSIX_F_CLOSE_END_TIMESTAMP   : 658659.624955325 sec (ktime)
+  POSIX_F_READ_TIME             : 0.000006216 sec
+  POSIX_F_WRITE_TIME            : 0.000057032 sec
+  POSIX_F_MAX_READ_TIME         : 0.000006216 sec
+  POSIX_F_MAX_WRITE_TIME        : 0.000043972 sec
+============================================================================================

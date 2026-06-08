@@ -1,0 +1,139 @@
+kdarshan is running. Tracing target PID. Press Ctrl-C to stop...
+[DISCOVERY] File opened: /home/bigdatalab/tchoe/kdarshan/testfile.bin (Hash: 36028943068081356, PID: 143866, Comm: io_bench)
+DXT_TRACE: WRITE | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642199413 | Duration: 0.000043220 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642254628 | Duration: 0.000008627 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642265653 | Duration: 0.000006046 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642275507 | Duration: 0.000002401 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642279763 | Duration: 0.000003448 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642287115 | Duration: 0.000002128 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642290948 | Duration: 0.000003219 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642297493 | Duration: 0.000002018 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642300953 | Duration: 0.000003140 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642307195 | Duration: 0.000001984 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642310623 | Duration: 0.000003168 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642316903 | Duration: 0.000002100 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642320519 | Duration: 0.000003188 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642326793 | Duration: 0.000001988 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642330253 | Duration: 0.000003178 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642336763 | Duration: 0.000001988 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642340419 | Duration: 0.000003232 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642346888 | Duration: 0.000001979 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642350303 | Duration: 0.000003165 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642356691 | Duration: 0.000001984 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642360228 | Duration: 0.000003151 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642366715 | Duration: 0.000001968 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642370223 | Duration: 0.000003152 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642376583 | Duration: 0.000001980 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642380107 | Duration: 0.000003160 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642386499 | Duration: 0.000001969 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642390033 | Duration: 0.000003242 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642396511 | Duration: 0.000001977 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642400053 | Duration: 0.000003168 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642406673 | Duration: 0.000001970 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642410363 | Duration: 0.000003172 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642416907 | Duration: 0.000001986 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642420471 | Duration: 0.000003292 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642426979 | Duration: 0.000001974 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642430647 | Duration: 0.000003192 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642436963 | Duration: 0.000001978 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642440508 | Duration: 0.000003171 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642446768 | Duration: 0.000002147 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642450479 | Duration: 0.000003314 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642456863 | Duration: 0.000002092 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642460373 | Duration: 0.000003374 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642466928 | Duration: 0.000001985 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642470319 | Duration: 0.000003444 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642476991 | Duration: 0.000001982 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642480415 | Duration: 0.000003228 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642486919 | Duration: 0.000002252 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642490595 | Duration: 0.000003484 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642497299 | Duration: 0.000002162 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642501043 | Duration: 0.000003264 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642507783 | Duration: 0.000002000 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642511341 | Duration: 0.000003182 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642517768 | Duration: 0.000001967 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642521327 | Duration: 0.000003341 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642527955 | Duration: 0.000001993 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642531507 | Duration: 0.000003336 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642538219 | Duration: 0.000001989 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642541803 | Duration: 0.000003188 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642548283 | Duration: 0.000002004 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642551859 | Duration: 0.000003174 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642558515 | Duration: 0.000001998 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642562403 | Duration: 0.000003165 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642568935 | Duration: 0.000002038 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642572701 | Duration: 0.000003262 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642579067 | Duration: 0.000001968 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642582483 | Duration: 0.000003248 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642588955 | Duration: 0.000001976 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642592655 | Duration: 0.000002699 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642596805 | Duration: 0.000000751 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642598260 | Duration: 0.000001205 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642600768 | Duration: 0.000000756 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642602220 | Duration: 0.000001208 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642604908 | Duration: 0.000000756 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642606211 | Duration: 0.000001203 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642608723 | Duration: 0.000000749 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642610161 | Duration: 0.000001207 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642612558 | Duration: 0.000000754 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642613994 | Duration: 0.000001199 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642616411 | Duration: 0.000000756 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642617973 | Duration: 0.000001202 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642620600 | Duration: 0.000000765 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642621909 | Duration: 0.000001211 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642624444 | Duration: 0.000000751 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642625865 | Duration: 0.000001211 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642628523 | Duration: 0.000000753 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642630026 | Duration: 0.000001202 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642632535 | Duration: 0.000000758 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642633843 | Duration: 0.000001209 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642636405 | Duration: 0.000000756 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642637840 | Duration: 0.000001214 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642640227 | Duration: 0.000000755 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642641659 | Duration: 0.000001207 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642644044 | Duration: 0.000000752 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642645469 | Duration: 0.000001239 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642648020 | Duration: 0.000000760 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642649335 | Duration: 0.000001209 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642651857 | Duration: 0.000000763 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642653168 | Duration: 0.000001255 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642655748 | Duration: 0.000000760 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: WRITE | PID: 143866 | Offset: 64 | Length: 64 | Start: 658210.642657183 | Duration: 0.000001209 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+DXT_TRACE: READ | PID: 143866 | Offset: 0 | Length: 64 | Start: 658210.642659570 | Duration: 0.000000755 | File: /home/bigdatalab/tchoe/kdarshan/testfile.bin
+
+======================== kdarshan POSIX I/O characterization report ========================
+
+File: /home/bigdatalab/tchoe/kdarshan/testfile.bin (Hash: 36028943068081356)
+--------------------------------------------------------------------------------
+  POSIX_OPENS                   : 1
+  POSIX_READS                   : 50
+  POSIX_WRITES                  : 50
+  POSIX_SEEKS                   : 50
+  POSIX_MODE                    : 420
+  POSIX_BYTES_READ              : 3200
+  POSIX_BYTES_WRITTEN           : 3200
+  POSIX_MAX_BYTE_READ           : 63
+  POSIX_MAX_BYTE_WRITTEN        : 127
+  POSIX_CONSEC_WRITES           : 1
+  POSIX_SEQ_WRITES              : 1
+  POSIX_RW_SWITCHES             : 99
+  POSIX_MEM_ALIGNMENT           : 8
+  POSIX_FILE_NOT_ALIGNED        : 49
+  POSIX_FILE_ALIGNMENT          : 4096
+  POSIX_MAX_READ_TIME_SIZE      : 64
+  POSIX_MAX_WRITE_TIME_SIZE     : 64
+  POSIX_SIZE_READ_0_100         : 50
+  POSIX_SIZE_WRITE_0_100        : 50
+  POSIX_F_OPEN_START_TIMESTAMP  : 658210.642160515 sec (ktime)
+  POSIX_F_READ_START_TIMESTAMP  : 658210.642254628 sec (ktime)
+  POSIX_F_WRITE_START_TIMESTAMP : 658210.642199413 sec (ktime)
+  POSIX_F_CLOSE_START_TIMESTAMP : 658210.642665381 sec (ktime)
+  POSIX_F_OPEN_END_TIMESTAMP    : 658210.642160515 sec (ktime)
+  POSIX_F_READ_END_TIMESTAMP    : 658210.642660325 sec (ktime)
+  POSIX_F_WRITE_END_TIMESTAMP   : 658210.642658392 sec (ktime)
+  POSIX_F_CLOSE_END_TIMESTAMP   : 658210.642665381 sec (ktime)
+  POSIX_F_READ_TIME             : 0.000086402 sec
+  POSIX_F_WRITE_TIME            : 0.000171797 sec
+  POSIX_F_MAX_READ_TIME         : 0.000008627 sec
+  POSIX_F_MAX_WRITE_TIME        : 0.000043220 sec
+============================================================================================
