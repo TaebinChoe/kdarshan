@@ -13,6 +13,8 @@
 #include "kdarshan.skel.h"
 
 static volatile bool exiting = false;
+static char output_mode[32] = "performance";
+static unsigned long long start_ns_monotonic = 0;
 
 static void sig_handler(int sig) {
     exiting = true;
@@ -184,6 +186,11 @@ static int handle_path_event(void *ctx, void *data, size_t data_sz) {
     }
     
     put_path(e->path_hash, resolved);
+    if (strcmp(output_mode, "security") == 0) {
+        printf("[DISCOVERY] File opened: %s (Hash: %llu, PID: %u, Comm: %s)\n",
+               resolved, e->path_hash, e->pid, e->comm);
+        fflush(stdout);
+    }
     fprintf(stderr, "[DISCOVERY] File opened: %s (Hash: %llu, PID: %u, Comm: %s)\n",
             resolved, e->path_hash, e->pid, e->comm);
     return 0;
@@ -191,6 +198,25 @@ static int handle_path_event(void *ctx, void *data, size_t data_sz) {
 
 static int handle_dxt_event(void *ctx, void *data, size_t data_sz) {
     const struct dxt_event *e = data;
+    
+    if (strcmp(output_mode, "security") == 0) {
+        const char *filename = get_path(e->path_hash);
+        double start_sec = (double)(e->start_ns - start_ns_monotonic) / 1e9;
+        double end_sec = (double)(e->end_ns - start_ns_monotonic) / 1e9;
+        if (start_sec < 0.0) start_sec = 0.0;
+        if (end_sec < start_sec) end_sec = start_sec;
+        
+        printf("X_POSIX: pid=%u %s(file=\"%s\", offset=%lld, length=%lld) start=%.6f end=%.6f\n",
+               e->pid,
+               e->write_flag ? "write" : "read",
+               filename ? filename : "UNKNOWN",
+               e->offset,
+               e->length,
+               start_sec,
+               end_sec);
+        fflush(stdout);
+    }
+
     struct dxt_event_node *node = malloc(sizeof(struct dxt_event_node));
     if (!node) {
         fprintf(stderr, "Out of memory storing DXT event\n");
@@ -302,6 +328,48 @@ const char *posix_f_counter_names[] = {
     "POSIX_F_VARIANCE_RANK_BYTES"
 };
 
+static void load_config(bool *dxt_enabled, char *out_mode, size_t max_mode_len) {
+    const char *config_path = getenv("DARSHAN_CONFIG_PATH");
+    if (config_path) {
+        FILE *f = fopen(config_path, "r");
+        if (f) {
+            char line[512];
+            while (fgets(line, sizeof(line), f)) {
+                // Strip comments and leading whitespace
+                char *ptr = line;
+                while (*ptr && (*ptr == ' ' || *ptr == '\t' || *ptr == '\r' || *ptr == '\n')) {
+                    ptr++;
+                }
+                if (*ptr == '\0' || *ptr == '#') {
+                    continue;
+                }
+                // Tokenize key and val
+                char *key = strtok(ptr, " \t\r\n");
+                if (!key) continue;
+                char *val = strtok(NULL, " \t\r\n");
+                if (!val) continue;
+
+                if (strcmp(key, "MOD_ENABLE") == 0) {
+                    if (strstr(val, "DXT_POSIX") || strstr(val, "dxt_posix") || strstr(val, "DXT") || strstr(val, "dxt")) {
+                        *dxt_enabled = true;
+                    }
+                } else if (strcmp(key, "OUTPUT_MODE") == 0) {
+                    strncpy(out_mode, val, max_mode_len - 1);
+                    out_mode[max_mode_len - 1] = '\0';
+                }
+            }
+            fclose(f);
+        } else {
+            fprintf(stderr, "WARNING: Config path DARSHAN_CONFIG_PATH=%s is specified but cannot open file.\n", config_path);
+        }
+    }
+    const char *env_output_mode = getenv("DARSHAN_OUTPUT_MODE");
+    if (env_output_mode) {
+        strncpy(out_mode, env_output_mode, max_mode_len - 1);
+        out_mode[max_mode_len - 1] = '\0';
+    }
+}
+
 int main(int argc, char **argv) {
     struct ring_buffer *rb = NULL;
     struct kdarshan_bpf *skel;
@@ -324,6 +392,9 @@ int main(int argc, char **argv) {
                 exit(EXIT_FAILURE);
         }
     }
+
+    load_config(&dxt_enabled, output_mode, sizeof(output_mode));
+    fprintf(stderr, "kdarshan configured in %s mode (dxt %s)\n", output_mode, dxt_enabled ? "enabled" : "disabled");
 
     libbpf_set_print(libbpf_print_fn);
 
@@ -359,7 +430,7 @@ int main(int argc, char **argv) {
     time_t start_time = time(NULL);
     struct timespec ts_start;
     clock_gettime(CLOCK_MONOTONIC, &ts_start);
-    unsigned long long start_ns_monotonic = (unsigned long long)ts_start.tv_sec * 1000000000ULL + ts_start.tv_nsec;
+    start_ns_monotonic = (unsigned long long)ts_start.tv_sec * 1000000000ULL + ts_start.tv_nsec;
 
     char exe_buf[512] = "unknown";
     uid_t target_uid = 0;
@@ -447,103 +518,101 @@ int main(int argc, char **argv) {
     }
     printf("\n");
 
-    if (!dxt_enabled) {
-        printf("# description of columns:\n");
-        printf("#   <module>: module responsible for this I/O record.\n");
-        printf("#   <rank>: MPI rank.  -1 indicates that the file is shared\n");
-        printf("#      across all processes and statistics are aggregated.\n");
-        printf("#   <record id>: hash of the record's file path\n");
-        printf("#   <counter name> and <counter value>: statistical counters.\n");
-        printf("#      A value of -1 indicates that Darshan could not monitor\n");
-        printf("#      that counter, and its value should be ignored.\n");
-        printf("#   <file name>: full file path for the record.\n");
-        printf("#   <mount pt>: mount point that the file resides on.\n");
-        printf("#   <fs type>: type of file system that the file resides on.\n\n");
+    // Always print standard POSIX module data
+    printf("# description of columns:\n");
+    printf("#   <module>: module responsible for this I/O record.\n");
+    printf("#   <rank>: MPI rank.  -1 indicates that the file is shared\n");
+    printf("#      across all processes and statistics are aggregated.\n");
+    printf("#   <record id>: hash of the record's file path\n");
+    printf("#   <counter name> and <counter value>: statistical counters.\n");
+    printf("#      A value of -1 indicates that Darshan could not monitor\n");
+    printf("#      that counter, and its value should be ignored.\n");
+    printf("#   <file name>: full file path for the record.\n");
+    printf("#   <mount pt>: mount point that the file resides on.\n");
+    printf("#   <fs type>: type of file system that the file resides on.\n\n");
 
-        printf("# *******************************************************\n");
-        printf("# POSIX module data\n");
-        printf("# *******************************************************\n\n");
+    printf("# *******************************************************\n");
+    printf("# POSIX module data\n");
+    printf("# *******************************************************\n\n");
 
-        printf("# description of POSIX counters:\n");
-        printf("#   POSIX_*: posix operation counts.\n");
-        printf("#   READS,WRITES,OPENS,SEEKS,STATS,MMAPS,SYNCS,FILENOS,DUPS are types of operations.\n");
-        printf("#   POSIX_RENAME_SOURCES/TARGETS: total count file was source or target of a rename operation\n");
-        printf("#   POSIX_RENAMED_FROM: Darshan record ID of the first rename source, if file was a rename target\n");
-        printf("#   POSIX_MODE: mode that file was opened in.\n");
-        printf("#   POSIX_BYTES_*: total bytes read and written.\n");
-        printf("#   POSIX_MAX_BYTE_*: highest offset byte read and written.\n");
-        printf("#   POSIX_CONSEC_*: number of exactly adjacent reads and writes.\n");
-        printf("#   POSIX_SEQ_*: number of reads and writes from increasing offsets.\n");
-        printf("#   POSIX_RW_SWITCHES: number of times access alternated between read and write.\n");
-        printf("#   POSIX_*_ALIGNMENT: memory and file alignment.\n");
-        printf("#   POSIX_*_NOT_ALIGNED: number of reads and writes that were not aligned.\n");
-        printf("#   POSIX_MAX_*_TIME_SIZE: size of the slowest read and write operations.\n");
-        printf("#   POSIX_SIZE_*_*: histogram of read and write access sizes.\n");
-        printf("#   POSIX_STRIDE*_STRIDE: the four most common strides detected.\n");
-        printf("#   POSIX_STRIDE*_COUNT: count of the four most common strides.\n");
-        printf("#   POSIX_ACCESS*_ACCESS: the four most common access sizes.\n");
-        printf("#   POSIX_ACCESS*_COUNT: count of the four most common access sizes.\n");
-        printf("#   POSIX_*_RANK: rank of the processes that were the fastest and slowest at I/O (for shared files).\n");
-        printf("#   POSIX_*_RANK_BYTES: bytes transferred by the fastest and slowest ranks (for shared files).\n");
-        printf("#   POSIX_F_*_START_TIMESTAMP: timestamp of first open/read/write/close.\n");
-        printf("#   POSIX_F_*_END_TIMESTAMP: timestamp of last open/read/write/close.\n");
-        printf("#   POSIX_F_READ/WRITE/META_TIME: cumulative time spent in read, write, or metadata operations.\n");
-        printf("#   POSIX_F_MAX_*_TIME: duration of the slowest read and write operations.\n");
-        printf("#   POSIX_F_*_RANK_TIME: fastest and slowest I/O time for a single rank (for shared files).\n");
-        printf("#   POSIX_F_VARIANCE_RANK_*: variance of total I/O time and bytes moved for all ranks (for shared files).\n\n");
+    printf("# description of POSIX counters:\n");
+    printf("#   POSIX_*: posix operation counts.\n");
+    printf("#   READS,WRITES,OPENS,SEEKS,STATS,MMAPS,SYNCS,FILENOS,DUPS are types of operations.\n");
+    printf("#   POSIX_RENAME_SOURCES/TARGETS: total count file was source or target of a rename operation\n");
+    printf("#   POSIX_RENAMED_FROM: Darshan record ID of the first rename source, if file was a rename target\n");
+    printf("#   POSIX_MODE: mode that file was opened in.\n");
+    printf("#   POSIX_BYTES_*: total bytes read and written.\n");
+    printf("#   POSIX_MAX_BYTE_*: highest offset byte read and written.\n");
+    printf("#   POSIX_CONSEC_*: number of exactly adjacent reads and writes.\n");
+    printf("#   POSIX_SEQ_*: number of reads and writes from increasing offsets.\n");
+    printf("#   POSIX_RW_SWITCHES: number of times access alternated between read and write.\n");
+    printf("#   POSIX_*_ALIGNMENT: memory and file alignment.\n");
+    printf("#   POSIX_*_NOT_ALIGNED: number of reads and writes that were not aligned.\n");
+    printf("#   POSIX_MAX_..._TIME_SIZE: size of the slowest read and write operations.\n");
+    printf("#   POSIX_SIZE_*_*: histogram of read and write access sizes.\n");
+    printf("#   POSIX_STRIDE*_STRIDE: the four most common strides detected.\n");
+    printf("#   POSIX_STRIDE*_COUNT: count of the four most common strides.\n");
+    printf("#   POSIX_ACCESS*_ACCESS: the four most common access sizes.\n");
+    printf("#   POSIX_ACCESS*_COUNT: count of the four most common access sizes.\n");
+    printf("#   POSIX_*_RANK: rank of the processes that were the fastest and slowest at I/O (for shared files).\n");
+    printf("#   POSIX_*_RANK_BYTES: bytes transferred by the fastest and slowest ranks (for shared files).\n");
+    printf("#   POSIX_F_*_START_TIMESTAMP: timestamp of first open/read/write/close.\n");
+    printf("#   POSIX_F_*_END_TIMESTAMP: timestamp of last open/read/write/close.\n");
+    printf("#   POSIX_F_READ/WRITE/META_TIME: cumulative time spent in read, write, or metadata operations.\n");
+    printf("#   POSIX_F_MAX_*_TIME: duration of the slowest read and write operations.\n");
+    printf("#   POSIX_F_*_RANK_TIME: fastest and slowest I/O time for a single rank (for shared files).\n");
+    printf("#   POSIX_F_VARIANCE_RANK_*: variance of total I/O time and bytes moved for all ranks (for shared files).\n\n");
 
-        printf("# WARNING: POSIX_OPENS counter includes both POSIX_FILENOS and POSIX_DUPS counts\n\n");
-        printf("# WARNING: POSIX counters related to file offsets may be incorrect if a file is simultaneously accessed by both POSIX and STDIO (e.g., using fileno())\n");
-        printf("# \t- Affected counters include: MAX_BYTE_{READ|WRITTEN}, CONSEC_{READS|WRITES}, SEQ_{READS|WRITES}, {MEM|FILE}_NOT_ALIGNED, STRIDE*_STRIDE\n\n");
+    printf("# WARNING: POSIX_OPENS counter includes both POSIX_FILENOS and POSIX_DUPS counts\n\n");
+    printf("# WARNING: POSIX counters related to file offsets may be incorrect if a file is simultaneously accessed by both POSIX and STDIO (e.g., using fileno())\n");
+    printf("# \t- Affected counters include: MAX_BYTE_{READ|WRITTEN}, CONSEC_{READS|WRITES}, SEQ_{READS|WRITES}, {MEM|FILE}_NOT_ALIGNED, STRIDE*_STRIDE\n\n");
 
-        printf("#<module>\t<rank>\t<record id>\t<counter>\t<value>\t<file name>\t<mount pt>\t<fs type>\n");
+    printf("#<module>\t<rank>\t<record id>\t<counter>\t<value>\t<file name>\t<mount pt>\t<fs type>\n");
 
-        unsigned long long next_key, map_key = 0;
-        struct kdarshan_file_stats stats;
-        int stats_fd = bpf_map__fd(skel->maps.file_stats);
+    unsigned long long next_key, map_key = 0;
+    struct kdarshan_file_stats stats;
+    int stats_fd = bpf_map__fd(skel->maps.file_stats);
 
-        while (bpf_map_get_next_key(stats_fd, &map_key, &next_key) == 0) {
-            err = bpf_map_lookup_elem(stats_fd, &next_key, &stats);
-            if (err == 0) {
-                const char *filename = get_path(stats.path_hash);
-                if (!filename) filename = "UNKNOWN";
+    while (bpf_map_get_next_key(stats_fd, &map_key, &next_key) == 0) {
+        err = bpf_map_lookup_elem(stats_fd, &next_key, &stats);
+        if (err == 0) {
+            const char *filename = get_path(stats.path_hash);
+            if (!filename) filename = "UNKNOWN";
 
-                char mnt_pt[256], fs_type[64];
-                find_mount(filename, mnt_pt, sizeof(mnt_pt), fs_type, sizeof(fs_type));
+            char mnt_pt[256], fs_type[64];
+            find_mount(filename, mnt_pt, sizeof(mnt_pt), fs_type, sizeof(fs_type));
 
-                // Print integer counters
-                for (int i = 0; i < POSIX_NUM_INDICES; i++) {
-                    printf("POSIX\t-1\t%llu\t%s\t%lld\t%s\t%s\t%s\n",
-                           stats.path_hash,
-                           posix_counter_names[i],
-                           stats.counters[i],
-                           filename,
-                           mnt_pt,
-                           fs_type);
-                }
-                // Print float counters
-                for (int i = 0; i < POSIX_F_NUM_INDICES; i++) {
-                    double val = (double)stats.fcounters[i] / 1e9;
-                    printf("POSIX\t-1\t%llu\t%s\t%.6f\t%s\t%s\t%s\n",
-                           stats.path_hash,
-                           posix_f_counter_names[i],
-                           val,
-                           filename,
-                           mnt_pt,
-                           fs_type);
-                }
+            // Print integer counters
+            for (int i = 0; i < POSIX_NUM_INDICES; i++) {
+                printf("POSIX\t-1\t%llu\t%s\t%lld\t%s\t%s\t%s\n",
+                       stats.path_hash,
+                       posix_counter_names[i],
+                       stats.counters[i],
+                       filename,
+                       mnt_pt,
+                       fs_type);
             }
-            map_key = next_key;
+            // Print float counters
+            for (int i = 0; i < POSIX_F_NUM_INDICES; i++) {
+                double val = (double)stats.fcounters[i] / 1e9;
+                printf("POSIX\t-1\t%llu\t%s\t%.6f\t%s\t%s\t%s\n",
+                       stats.path_hash,
+                       posix_f_counter_names[i],
+                       val,
+                       filename,
+                       mnt_pt,
+                       fs_type);
+            }
         }
-    } else {
-        printf("# ***************************************************\n");
+        map_key = next_key;
+    }
+
+    if (dxt_enabled) {
+        printf("\n# ***************************************************\n");
         printf("# DXT_POSIX module data\n");
         printf("# ***************************************************\n\n");
 
-        unsigned long long next_key, map_key = 0;
-        struct kdarshan_file_stats stats;
-        int stats_fd = bpf_map__fd(skel->maps.file_stats);
-
+        map_key = 0;
         while (bpf_map_get_next_key(stats_fd, &map_key, &next_key) == 0) {
             err = bpf_map_lookup_elem(stats_fd, &next_key, &stats);
             if (err == 0) {

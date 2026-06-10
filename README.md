@@ -68,7 +68,8 @@ Take note of the absolute path to your `libbpf/src/install` directory.
 
 ## Configuration
 
-You must configure the path to your `libbpf` installation and `bpftool` in the `Makefile` before building.
+### 1. Build Configuration
+Before building, you must configure the path to your `libbpf` installation and `bpftool` in the `Makefile`.
 
 1.  Open the [Makefile](Makefile).
 2.  Set the following variables:
@@ -78,6 +79,30 @@ You must configure the path to your `libbpf` installation and `bpftool` in the `
 Alternatively, you can pass these variables directly on the command line during compilation:
 ```bash
 make LIBBPF_DIR=/path/to/libbpf/install BPFTOOL=/path/to/bpftool
+```
+
+### 2. Runtime Configuration (Modes & Module Activation)
+`kdarshan` supports configuration via a configuration file and environment variables.
+
+#### Environment Variables
+*   `DARSHAN_CONFIG_PATH`: Path to the `darshan.conf` configuration file.
+*   `DARSHAN_OUTPUT_MODE`: Directly sets the output mode, overriding the configuration file (`performance` or `security`).
+
+#### Configuration File Format
+You can specify settings in a configuration file (e.g., `test_darshan.conf`). The parser supports:
+*   `#` for comments
+*   `MOD_ENABLE DXT_POSIX`: Enables the DXT profiling module. This is equivalent to running `kdarshan` with the `-d` command-line option.
+*   `OUTPUT_MODE <mode>`: Sets the operational and output behavior. Valid options are:
+    *   `performance` (default): Focus on logging performance. Logs are buffered in-memory and written only when the tracer terminates.
+    *   `security`: Focus on security/auditing. Prints real-time path discovery events and DXT I/O events (reads/writes) immediately to standard output, while still generating the standard Darshan final log summary upon exit.
+
+Example configuration file content:
+```text
+# Enable DXT Posix module
+MOD_ENABLE DXT_POSIX
+
+# Enable security-first real-time auditing mode
+OUTPUT_MODE security
 ```
 
 ---
@@ -101,33 +126,30 @@ make clean
 Since `kdarshan` loads programs into the kernel, it must be run with root privileges (using `sudo`).
 
 ```text
-Usage: sudo ./kdarshan [-p target_pid] [-d]
+Usage: sudo [DARSHAN_CONFIG_PATH=...] [DARSHAN_OUTPUT_MODE=...] ./kdarshan [-p target_pid] [-d]
 ```
 
 ### Command Options:
 *   `-p <target_pid>`: Profiles only the process with the given PID. If not specified, `kdarshan` tracks system-wide process accesses.
-*   `-d`: Enabled DXT (Darshan Extended Tracing) mode. Logs trace events into memory and prints a grouped DXT report on exit.
+*   `-d`: Enables DXT (Darshan Extended Tracing) mode. Logs trace events into memory and prints a grouped DXT report on exit (equivalent to `MOD_ENABLE DXT_POSIX` in config).
 
-### Execution Scenarios:
+### Output Modes Detail:
 
-#### A. Tracing a short-lived benchmark (PID-filtered)
-1.  Launch your benchmark in the background (make sure it sleeps for a few seconds at startup to let the tracer attach):
-    ```bash
-    ./io_bench 1000000 100 &
-    PID=$!
-    ```
-2.  Launch `kdarshan` targeting that PID and redirect output to a file:
-    ```bash
-    sudo ./kdarshan -p $PID > my_job_profile.log
-    ```
-3.  Wait for the benchmark to finish, then press `Ctrl-C` to stop `kdarshan` and write the log.
+#### 1. Performance-First Mode (Default)
+Optimized for minimum overhead.
+*   **Behavior**: Events are captured silently in the kernel and userspace maps/buffers.
+*   **Output**: No output is printed during execution. When the tracer receives `SIGINT` (Ctrl-C) or `SIGTERM`, it prints the complete Darshan log report.
+*   **Log Composition**: If DXT is enabled (`-d` or `MOD_ENABLE DXT_POSIX`), the report will contain **both** the standard POSIX counter tables and the detailed chronological DXT trace tables.
 
-#### B. System-Wide Tracing
-```bash
-sudo ./kdarshan > system_profile.log
-# Let your applications run
-# Press Ctrl-C to generate the final characterization report
-```
+#### 2. Security-First Mode (`OUTPUT_MODE security`)
+Optimized for real-time security auditing (similar to the `-P` option in `eauditd`).
+*   **Behavior**:
+    *   Whenever a file is opened, `kdarshan` prints a `[DISCOVERY]` event in real-time to standard output.
+    *   If DXT is enabled, each read and write event is formatted and printed in real-time to standard output.
+*   **Real-time Event Format**:
+    *   **Path Discovery**: `[DISCOVERY] File opened: <path> (Hash: <hash>, PID: <pid>, Comm: <comm>)`
+    *   **DXT I/O Event**: `X_POSIX: pid=<pid> <read|write>(file="<path>", offset=<offset>, length=<length>) start=<start_sec> end=<end_sec>`
+*   **Termination Behavior**: Upon receiving `SIGINT` (Ctrl-C), it still prints the complete final summary Darshan log report to standard output.
 
 ---
 
