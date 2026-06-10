@@ -371,6 +371,8 @@ static void load_config(bool *dxt_enabled, char *out_mode, size_t max_mode_len) 
 }
 
 int main(int argc, char **argv) {
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
     struct ring_buffer *rb = NULL;
     struct kdarshan_bpf *skel;
     int err;
@@ -460,7 +462,7 @@ int main(int argc, char **argv) {
             filter_pid ? "target PID" : "all processes");
 
     while (!exiting) {
-        ring_buffer__poll(rb, 100);
+        ring_buffer__poll(rb, -1);
     }
 
     // Flush any remaining ringbuffer events

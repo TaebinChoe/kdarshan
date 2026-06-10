@@ -1,208 +1,143 @@
 # kdarshan
 
-`kdarshan` is a transparent, kernel-level eBPF reimplementation of the Darshan HPC I/O characterization tool, including Darshan Extended Tracing (DXT) capabilities.
+`kdarshan` is a transparent, kernel-level eBPF-based I/O characterization tool designed to replicate the output formatting and metrics of the original Darshan tool (including standard POSIX counters and Darshan Extended Tracing (DXT) chronological events).
 
-Unlike the original Darshan which operates as a userspace interposer library requiring dynamic linking or binary interposition, `kdarshan` runs transparently at the kernel level using Compile Once Run Everywhere (CO-RE) eBPF hooks. It requires no modifications, relinking, or restarts of the target HPC applications.
-
----
-
-## Features
-
-*   **Zero-Interposition Transparency**: Hooks relevant POSIX-style system calls at the tracepoint level.
-*   **Comprehensive Counter Metrics**:
-    *   **Operation Counts**: Reads, writes, seeks, opens, stats, dups, mmaps, fsyncs, and fdatasyncs.
-    *   **I/O Volume**: Total bytes read and written, max read/write offsets.
-    *   **Aesthetic Alignment Tracking**: Detects memory buffer alignment and file block alignment.
-    *   **Spatial Patterns**: Consecutive and sequential access tracking.
-    *   **Switches**: Tracks read-write mode switches.
-    *   **Size Bucketing**: Automatically categorizes reads and writes into size-range counters.
-*   **Original Darshan log format alignment**:
-    *   **Standard POSIX Mode (Without `-d`)**: Outputs the general header, mount point list, and tab-separated POSIX counters exactly replicating original `darshan-parser` output.
-    *   **DXT Mode (With `-d`)**: Buffers events in userspace and outputs grouped, space-aligned chronological trace records for each file on exit, matching the original `darshan-dxt-parser` format.
-*   **File System Mount & FS Type Resolution**: Parses `/proc/mounts` and performs longest-prefix path matching to map each tracked file path to its correct mount point and filesystem type (e.g. `/` and `ext4` or `/pscratch` and `lustre`).
-*   **Process Metadata Caching**: Gathers the command line and UID of target processes immediately at startup to ensure headers are correctly populated even if the process exits before `kdarshan` is stopped.
+Unlike userspace-interposition tools, `kdarshan` hooks file I/O operations directly at the kernel syscall level via tracepoints. This means it requires zero library interposition, zero recompilation, and zero application modification.
 
 ---
 
 ## Directory Structure
 
-*   [kdarshan.h](kdarshan.h): Common headers, structs, and enum offsets.
-*   [kdarshan.bpf.c](kdarshan.bpf.c): BPF tracepoint hooks (kernel space).
-*   [kdarshan.c](kdarshan.c): BPF skeleton loader, path resolution, and report formatter (userspace).
-*   [Makefile](Makefile): Build configuration pointing to local static libbpf libraries.
-*   [kdarshan_test_suite.c](kdarshan_test_suite.c): Test suite designed for multi-metric coverage.
-*   [verify_test_suite.sh](verify_test_suite.sh): Test harness running assertions on BPF outputs.
+All files reside in the root directory:
+*   [Makefile](file:///home/bigdatalab/tchoe/kdarshan/Makefile): The build file configures search paths for `libbpf` headers and links compiled programs.
+*   [kdarshan.c](file:///home/bigdatalab/tchoe/kdarshan/kdarshan.c): Userspace agent which loads the BPF program, reads configuration, polls the trace ring buffers, and formats final output.
+*   [kdarshan.h](file:///home/bigdatalab/tchoe/kdarshan/kdarshan.h): Common headers, stat structs, and index definitions shared between kernel and userspace.
+*   [kdarshan.bpf.c](file:///home/bigdatalab/tchoe/kdarshan/kdarshan.bpf.c): BPF C source code loaded into the kernel tracing system calls.
+*   [kdarshan_test_suite.c](file:///home/bigdatalab/tchoe/kdarshan/kdarshan_test_suite.c): A multi-threaded C test harness executing read, write, seek, dup, and mmap operations.
+*   [verify_test_suite.sh](file:///home/bigdatalab/tchoe/kdarshan/verify_test_suite.sh): Test executor that runs kdarshan over the test suite and runs assertions on output logs.
 
 ---
 
-## Installation & Setup
+## Complete Quick Start (Copy & Paste)
+
+You can copy, paste, and run the following command blocks in order to fully install, configure, build, and run the project:
 
 ### 1. Install Prerequisites
-You will need tools to compile C programs, compile BPF bytecode, and link libraries.
-
-On Debian/Ubuntu:
+Run this on your Debian/Ubuntu machine to install compilation dependencies and tools:
 ```bash
 sudo apt-get update
-sudo apt-get install -y clang llvm libelf-dev zlib1g-dev make gcc pkg-config
+sudo apt-get install -y clang llvm libelf-dev zlib1g-dev make gcc pkg-config git
 ```
 
-### 2. Install `bpftool`
-`bpftool` is required to generate the skeleton header from the compiled BPF object.
+### 2. Install BPF tools
+Install kernel-specific utilities which include the `bpftool` compiler:
 ```bash
-# Install kernel-specific tools containing bpftool
 sudo apt-get install -y linux-tools-common linux-tools-$(uname -r)
 ```
-*Note: If the package is not found or you are using a custom/mainline kernel, locate `bpftool` on your system. It is usually found under `/usr/lib/linux-tools-...` or `/usr/sbin/bpftool`.*
+*(Note: If not globally available, locate `bpftool` on your system. Typical paths include `/usr/lib/linux-tools/...` or `/usr/sbin/bpftool`).*
 
-### 3. Build & Install `libbpf`
-`kdarshan` requires `libbpf` v1.0 or higher. If your system's package manager only provides an older version (e.g., Ubuntu 22.04 defaults to v0.5.0, which cannot parse modern 64-bit enum BTF structures), compile and install it from source:
-
+### 3. Compile and Install `libbpf`
+`kdarshan` requires static `libbpf` version 1.0 or higher. Build and compile it locally from source:
 ```bash
+# Clone the library repository in your home directory (e.g. /home/bigdatalab/tchoe)
+cd /home/bigdatalab/tchoe
 git clone https://github.com/libbpf/libbpf.git
 cd libbpf/src
 make BUILD_STATIC_ONLY=y DESTDIR=$(pwd)/install install
 ```
-Take note of the absolute path to your `libbpf/src/install` directory.
+
+### 4. Build kdarshan
+Navigate back to the project root directory and run `make`. 
+If your static `libbpf` install folder or `bpftool` path differs, specify them as environment variables during build:
+```bash
+cd /home/bigdatalab/tchoe/kdarshan
+
+# Clean any stale builds
+make clean
+
+# Compile with configured environment variables
+make LIBBPF_DIR=/home/bigdatalab/tchoe/libbpf/src/install BPFTOOL=/usr/lib/linux-tools/$(uname -r)/bpftool
+```
+This produces the `./kdarshan` tracer binary and the `./kdarshan_test_suite` binary.
+
+### 5. Verify Installation
+Run the automated test runner to ensure that BPF hooks are correctly logging and aggregating stats:
+```bash
+./verify_test_suite.sh
+```
 
 ---
 
-## Configuration
+## Configuration Reference
 
-### 1. Build Configuration
-Before building, you must configure the path to your `libbpf` installation and `bpftool` in the `Makefile`.
+`kdarshan` is configured using configuration files and environment variables.
 
-1.  Open the [Makefile](Makefile).
-2.  Set the following variables:
-    *   `LIBBPF_DIR`: Point this to your compiled static `libbpf` install directory (e.g. `/home/user/libbpf/src/install`).
-    *   `BPFTOOL`: Point this to the absolute path of `bpftool` if it is not in your global `PATH` (e.g. `/usr/lib/linux-tools/6.8.0-100-generic/bpftool`).
+### Environment Variables
+*   `DARSHAN_CONFIG_PATH`: Absolute path to the configuration file (e.g. `/home/bigdatalab/tchoe/kdarshan/test_darshan.conf`).
+*   `DARSHAN_OUTPUT_MODE`: Overrides the configuration file's output mode (`performance` or `security`).
 
-Alternatively, you can pass these variables directly on the command line during compilation:
-```bash
-make LIBBPF_DIR=/path/to/libbpf/install BPFTOOL=/path/to/bpftool
-```
+### Configuration File Options
+Configuration parameters are specified using `KEY VALUE` pairs (lines starting with `#` are ignored as comments).
 
-### 2. Runtime Configuration (Modes & Module Activation)
-`kdarshan` supports configuration via a configuration file and environment variables.
+1.  `MOD_ENABLE`
+    *   **Value**: `DXT_POSIX`
+    *   **Description**: Enables Darshan Extended Tracing (DXT) POSIX module tracing. If this is enabled, `kdarshan` records chronologically ordered read and write actions in userspace ring buffers. If omitted, DXT tracing is disabled, and only cumulative metrics are tracked.
+2.  `OUTPUT_MODE`
+    *   **Values**: `performance` (default) or `security`
+    *   **Description**:
+        *   `performance`: Focuses on minimizing tracer overhead. Captured events are stored silently in-memory. Output is printed to stdout only when `kdarshan` receives `SIGINT` (Ctrl-C) or terminates.
+        *   `security`: Focuses on real-time security auditing (similar to the `-P` option in `eauditd`). Prints event logs immediately as they happen to standard output, while still appending the complete final Darshan log upon tracer exit.
 
-#### Environment Variables
-*   `DARSHAN_CONFIG_PATH`: Path to the `darshan.conf` configuration file.
-*   `DARSHAN_OUTPUT_MODE`: Directly sets the output mode, overriding the configuration file (`performance` or `security`).
-
-#### Configuration File Format
-You can specify settings in a configuration file (e.g., `test_darshan.conf`). The parser supports:
-*   `#` for comments
-*   `MOD_ENABLE DXT_POSIX`: Enables the DXT profiling module. This is equivalent to running `kdarshan` with the `-d` command-line option.
-*   `OUTPUT_MODE <mode>`: Sets the operational and output behavior. Valid options are:
-    *   `performance` (default): Focus on logging performance. Logs are buffered in-memory and written only when the tracer terminates.
-    *   `security`: Focus on security/auditing. Prints real-time path discovery events and DXT I/O events (reads/writes) immediately to standard output, while still generating the standard Darshan final log summary upon exit.
-
-Example configuration file content:
+#### Example Configuration (`test_darshan.conf`)
 ```text
-# Enable DXT Posix module
+# Enable DXT trace logging
 MOD_ENABLE DXT_POSIX
 
-# Enable security-first real-time auditing mode
+# Enable security-first real-time printing
 OUTPUT_MODE security
 ```
 
 ---
 
-## Build Instructions
+## Detailed Output Behaviors
 
-Compile the BPF object, skeleton headers, userspace loader, and the test suite:
-```bash
-make
-```
+`kdarshan` produces output based on both the selected `OUTPUT_MODE` and whether DXT is enabled (`MOD_ENABLE DXT_POSIX` or the `-d` CLI option).
 
-Clean up all generated compilation files:
-```bash
-make clean
-```
+### Buffering & Real-time Latency
+To match the strict logging guarantees of `eaudit`:
+1.  **Zero Kernel-Space Buffering**: Unlike `eaudit` which caches up to 100 events in a per-CPU buffer in the kernel before flushing to the ring buffer, `kdarshan` submits every single trace event **immediately** (`bpf_ringbuf_submit`). This removes all kernel-level buffering delays.
+2.  **Unbuffered Output**: At startup, `kdarshan` disables standard library buffering for both `stdout` and `stderr` using `setvbuf(..., _IONBF)`. Every path discovery or DXT event printed is written directly to the underlying output file descriptor immediately without userspace memory buffering.
+
+### What happens when Security Mode is enabled BUT DXT is disabled?
+If you configure `OUTPUT_MODE security` but **do not** enable DXT tracing, the following behavior occurs:
+1.  **Real-Time Path Discovery**: Every time a tracked process opens a file, `kdarshan` will print a path discovery notification to standard output in real time:
+    ```text
+    [DISCOVERY] File opened: /home/user/kdarshan/testfile.bin (Hash: 36028943068081356, PID: 1234, Comm: my_app)
+    ```
+2.  **No Real-Time I/O Logs**: Because DXT tracing is disabled, read and write operations are not monitored via ring buffers. No `X_POSIX: pid=...` read/write events will be printed in real time.
+3.  **Final Summary Log**: When you stop the tracer via `Ctrl-C`, it prints the standard final summary log containing only the aggregated **POSIX module counters** (e.g. `POSIX_OPENS`, `POSIX_READS`, `POSIX_WRITES`, etc.). No DXT tables will be printed.
+
+### Execution Summary Matrix
+
+| OUTPUT_MODE | DXT Enabled? | Real-time output behavior | Final output behavior |
+| :--- | :--- | :--- | :--- |
+| `performance` | **No** | None (Silent during run) | Prints only POSIX module counter tables. |
+| `performance` | **Yes** | None (Silent during run) | Prints POSIX module counters + chronological DXT tables. |
+| `security` | **No** | Prints `[DISCOVERY]` events immediately. | Prints POSIX module counter tables. |
+| `security` | **Yes** | Prints `[DISCOVERY]` & DXT I/O read/write traces immediately. | Prints POSIX module counters + chronological DXT tables. |
 
 ---
 
 ## Running the Profiler
 
-Since `kdarshan` loads programs into the kernel, it must be run with root privileges (using `sudo`).
-
-```text
-Usage: sudo [DARSHAN_CONFIG_PATH=...] [DARSHAN_OUTPUT_MODE=...] ./kdarshan [-p target_pid] [-d]
-```
-
-### Command Options:
-*   `-p <target_pid>`: Profiles only the process with the given PID. If not specified, `kdarshan` tracks system-wide process accesses.
-*   `-d`: Enables DXT (Darshan Extended Tracing) mode. Logs trace events into memory and prints a grouped DXT report on exit (equivalent to `MOD_ENABLE DXT_POSIX` in config).
-
-### Output Modes Detail:
-
-#### 1. Performance-First Mode (Default)
-Optimized for minimum overhead.
-*   **Behavior**: Events are captured silently in the kernel and userspace maps/buffers.
-*   **Output**: No output is printed during execution. When the tracer receives `SIGINT` (Ctrl-C) or `SIGTERM`, it prints the complete Darshan log report.
-*   **Log Composition**: If DXT is enabled (`-d` or `MOD_ENABLE DXT_POSIX`), the report will contain **both** the standard POSIX counter tables and the detailed chronological DXT trace tables.
-
-#### 2. Security-First Mode (`OUTPUT_MODE security`)
-Optimized for real-time security auditing (similar to the `-P` option in `eauditd`).
-*   **Behavior**:
-    *   Whenever a file is opened, `kdarshan` prints a `[DISCOVERY]` event in real-time to standard output.
-    *   If DXT is enabled, each read and write event is formatted and printed in real-time to standard output.
-*   **Real-time Event Format**:
-    *   **Path Discovery**: `[DISCOVERY] File opened: <path> (Hash: <hash>, PID: <pid>, Comm: <comm>)`
-    *   **DXT I/O Event**: `X_POSIX: pid=<pid> <read|write>(file="<path>", offset=<offset>, length=<length>) start=<start_sec> end=<end_sec>`
-*   **Termination Behavior**: Upon receiving `SIGINT` (Ctrl-C), it still prints the complete final summary Darshan log report to standard output.
-
----
-
-## Checking & Interpreting the Results
-
-### 1. Standard POSIX Output (Without `-d`)
-Standard output matches original `darshan-parser` output and consists of three main sections:
-*   **Header Comments**: Metadata about the job including command line (`# exe:`), UID (`# uid:`), start/end timestamps, and execution run time.
-*   **Mount Points**: All active file system mounts on the host (`# mount entry: mount_pt fs_type`).
-*   **Counter Entries**: Tab-separated entries for every file tracked, structured as:
-    `<module>\t<rank>\t<record id>\t<counter>\t<value>\t<file name>\t<mount pt>\t<fs type>`
-    
-    *Example:*
-    ```text
-    POSIX	-1	36028943068081356	POSIX_OPENS	1	/home/user/kdarshan/testfile.bin	/	ext4
-    POSIX	-1	36028943068081356	POSIX_READS	50	/home/user/kdarshan/testfile.bin	/	ext4
-    POSIX	-1	36028943068081356	POSIX_BYTES_READ	3200	/home/user/kdarshan/testfile.bin	/	ext4
-    POSIX	-1	36028943068081356	POSIX_F_READ_TIME	0.000069	/home/user/kdarshan/testfile.bin	/	ext4
-    ```
-
-### 2. DXT POSIX Output (With `-d`)
-DXT output matches original `darshan-dxt-parser` output and shows chronological I/O transaction tables grouped per file:
-*   **DXT File Info**: Lists the file hash (`file_id`), hostname, total write/read counts, and file system details.
-*   **DXT Columns Header**:
-    `# Module    Rank  Wt/Rd  Segment          Offset       Length    Start(s)      End(s)   [OST]`
-*   **DXT Event Entries**:
-    - `Module`: Always `X_POSIX`.
-    - `Rank`: Always `0` (or MPI rank if integrated).
-    - `Wt/Rd`: `read` or `write`.
-    - `Segment`: Sequence number of the operation for this file.
-    - `Offset`: Target offset in the file.
-    - `Length`: Number of bytes requested.
-    - `Start(s)` / `End(s)`: Start and end timestamp in seconds, relative to the tracing startup time.
-    - `[OST]`: Lustre OST target index (`-1` for non-Lustre filesystems).
-
-    *Example:*
-    ```text
-    # DXT, file_id: 36028943068081356, file_name: /home/user/kdarshan/testfile.bin
-    # DXT, rank: 0, hostname: user-desktop
-    # DXT, write_count: 50, read_count: 50
-    # DXT, mnt_pt: /, fs_type: ext4
-    # Module    Rank  Wt/Rd  Segment          Offset       Length    Start(s)      End(s)   [OST]
-     X_POSIX        0   write         0                0               64       4.9076       4.9077    [-1]
-     X_POSIX        0    read         1                0               64       4.9079       4.9079    [-1]
-     X_POSIX        0   write         2               64               64       4.9080       4.9080    [-1]
-    ```
-
----
-
-## Validation & Testing
-
-Run the automated validation check suite to verify BPF metrics:
+The tracer binary must be run with root privileges:
 ```bash
-./verify_test_suite.sh
+# Run with a config file
+sudo DARSHAN_CONFIG_PATH=/home/bigdatalab/tchoe/kdarshan/test_darshan.conf ./kdarshan
+
+# Run filtering for a specific target process in performance mode
+sudo ./kdarshan -p <PID>
+
+# Run filtering for a specific process with DXT enabled
+sudo ./kdarshan -p <PID> -d
 ```
-This runs the deterministic `kdarshan_test_suite` program under standard and DXT tracing, and asserts all 16 metrics and DXT counts.
