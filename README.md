@@ -87,6 +87,9 @@ Configuration parameters are specified using `KEY VALUE` pairs (lines starting w
     *   **Description**:
         *   `performance`: Focuses on minimizing tracer overhead. Captured events are stored silently in-memory. Output is printed to stdout only when `kdarshan` receives `SIGINT` (Ctrl-C) or terminates.
         *   `security`: Focuses on real-time security auditing (similar to the `-P` option in `eauditd`). Prints event logs immediately as they happen to standard output, while still appending the complete final Darshan log upon tracer exit.
+3.  `EXCLUDE_PATH`
+    *   **Value**: Absolute path prefix string (e.g. `/proc/`) or `none`
+    *   **Description**: Specifies a directory prefix to exclude from tracking. If any path exclusions are configured via `EXCLUDE_PATH`, the default hardcoded exclusions are cleared and replaced by the custom entries. Use `EXCLUDE_PATH none` to disable all exclusions.
 
 #### Example Configuration (`test_darshan.conf`)
 ```text
@@ -95,6 +98,19 @@ MOD_ENABLE DXT_POSIX
 
 # Enable security-first real-time printing
 OUTPUT_MODE security
+
+# Exclude directories from tracing
+EXCLUDE_PATH /etc/
+EXCLUDE_PATH /dev/
+EXCLUDE_PATH /usr/
+EXCLUDE_PATH /bin/
+EXCLUDE_PATH /boot/
+EXCLUDE_PATH /lib/
+EXCLUDE_PATH /opt/
+EXCLUDE_PATH /sbin/
+EXCLUDE_PATH /sys/
+EXCLUDE_PATH /proc/
+EXCLUDE_PATH /var/
 ```
 
 ---

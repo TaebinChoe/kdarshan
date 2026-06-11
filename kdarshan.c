@@ -16,6 +16,33 @@ static volatile bool exiting = false;
 static char output_mode[32] = "performance";
 static unsigned long long start_ns_monotonic = 0;
 
+#define MAX_EXCLUDE_PATHS 64
+static char exclude_paths[MAX_EXCLUDE_PATHS][128] = {
+    "/etc/",
+    "/dev/",
+    "/usr/",
+    "/bin/",
+    "/boot/",
+    "/lib/",
+    "/opt/",
+    "/sbin/",
+    "/sys/",
+    "/proc/",
+    "/var/"
+};
+static int exclude_paths_count = 11;
+static bool exclude_paths_cleared = false;
+
+static bool is_path_excluded(const char *path) {
+    if (!path) return false;
+    for (int i = 0; i < exclude_paths_count; i++) {
+        if (strncmp(path, exclude_paths[i], strlen(exclude_paths[i])) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void sig_handler(int sig) {
     exiting = true;
 }
@@ -186,6 +213,9 @@ static int handle_path_event(void *ctx, void *data, size_t data_sz) {
     }
     
     put_path(e->path_hash, resolved);
+    if (is_path_excluded(resolved)) {
+        return 0;
+    }
     if (strcmp(output_mode, "security") == 0) {
         printf("[DISCOVERY] File opened: %s (Hash: %llu, PID: %u, Comm: %s)\n",
                resolved, e->path_hash, e->pid, e->comm);
@@ -198,9 +228,12 @@ static int handle_path_event(void *ctx, void *data, size_t data_sz) {
 
 static int handle_dxt_event(void *ctx, void *data, size_t data_sz) {
     const struct dxt_event *e = data;
+    const char *filename = get_path(e->path_hash);
+    if (is_path_excluded(filename)) {
+        return 0;
+    }
     
     if (strcmp(output_mode, "security") == 0) {
-        const char *filename = get_path(e->path_hash);
         double start_sec = (double)(e->start_ns - start_ns_monotonic) / 1e9;
         double end_sec = (double)(e->end_ns - start_ns_monotonic) / 1e9;
         if (start_sec < 0.0) start_sec = 0.0;
@@ -356,6 +389,20 @@ static void load_config(bool *dxt_enabled, char *out_mode, size_t max_mode_len) 
                 } else if (strcmp(key, "OUTPUT_MODE") == 0) {
                     strncpy(out_mode, val, max_mode_len - 1);
                     out_mode[max_mode_len - 1] = '\0';
+                } else if (strcmp(key, "EXCLUDE_PATH") == 0) {
+                    if (!exclude_paths_cleared) {
+                        exclude_paths_count = 0;
+                        exclude_paths_cleared = true;
+                    }
+                    if (strcmp(val, "none") == 0) {
+                        exclude_paths_count = 0;
+                    } else {
+                        if (exclude_paths_count < MAX_EXCLUDE_PATHS) {
+                            strncpy(exclude_paths[exclude_paths_count], val, 127);
+                            exclude_paths[exclude_paths_count][127] = '\0';
+                            exclude_paths_count++;
+                        }
+                    }
                 }
             }
             fclose(f);
@@ -581,6 +628,11 @@ int main(int argc, char **argv) {
             const char *filename = get_path(stats.path_hash);
             if (!filename) filename = "UNKNOWN";
 
+            if (is_path_excluded(filename)) {
+                map_key = next_key;
+                continue;
+            }
+
             char mnt_pt[256], fs_type[64];
             find_mount(filename, mnt_pt, sizeof(mnt_pt), fs_type, sizeof(fs_type));
 
@@ -620,6 +672,11 @@ int main(int argc, char **argv) {
             if (err == 0) {
                 const char *filename = get_path(stats.path_hash);
                 if (!filename) filename = "UNKNOWN";
+
+                if (is_path_excluded(filename)) {
+                    map_key = next_key;
+                    continue;
+                }
 
                 char mnt_pt[256], fs_type[64];
                 find_mount(filename, mnt_pt, sizeof(mnt_pt), fs_type, sizeof(fs_type));
